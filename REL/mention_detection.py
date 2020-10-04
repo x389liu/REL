@@ -117,7 +117,6 @@ class MentionDetection(MentionDetectionBase):
 
         # Verify if Flair, else ngram or custom.
         is_flair = isinstance(tagger, SequenceTagger)
-        dataset, processed_sentences, splits = self.split_text(dataset, is_flair)
         results = {}
         total_ment = 0
 
@@ -126,57 +125,46 @@ class MentionDetection(MentionDetectionBase):
         if is_flair:
             tagger.predict(processed_sentences)
 
-        for i, doc in enumerate(dataset):
-            contents = dataset[doc]
-            sentences_doc = [v[0] for v in contents.values()]
-            sentences = processed_sentences[splits[i] : splits[i + 1]]
+        for docid, snt in dataset.items():
             result_doc = []
+            for entity in (snt.get_spans("ner") if is_flair else tagger.predict(snt)):
+                text, start_pos, end_pos, conf, tag = (
+                    entity.text,
+                    entity.start_pos,
+                    entity.end_pos,
+                    entity.score,
+                    entity.tag,
+                )
+                total_ment += 1
 
-            for (idx_sent, (sentence, ground_truth_sentence)), snt in zip(
-                contents.items(), sentences
-            ):
-                for entity in (
-                    snt.get_spans("ner")
-                    if is_flair
-                    else tagger.predict(snt, processed_sentences)
-                ):
-                    text, start_pos, end_pos, conf, tag = (
-                        entity.text,
-                        entity.start_pos,
-                        entity.end_pos,
-                        entity.score,
-                        entity.tag,
-                    )
-                    total_ment += 1
+                m = self.preprocess_mention(text)
+                cands = self.get_candidates(m)
 
-                    m = self.preprocess_mention(text)
-                    cands = self.get_candidates(m)
+                if len(cands) == 0:
+                    continue
 
-                    if len(cands) == 0:
-                        continue
+                # Re-create ngram as 'text' is at times changed by Flair (e.g. double spaces are removed).
+                ngram = snt.text[start_pos:end_pos]
+                left_ctxt, right_ctxt = self.get_ctxt(
+                    start_pos, end_pos, 0, snt.text, snt.text
+                )
 
-                    # Re-create ngram as 'text' is at times changed by Flair (e.g. double spaces are removed).
-                    ngram = sentence[start_pos:end_pos]
-                    left_ctxt, right_ctxt = self.get_ctxt(
-                        start_pos, end_pos, idx_sent, sentence, sentences_doc
-                    )
+                res = {
+                    "mention": m,
+                    "context": (left_ctxt, right_ctxt),
+                    "candidates": cands,
+                    "gold": ["NONE"],
+                    "pos": start_pos,
+                    "sent_idx": 0,
+                    "ngram": ngram,
+                    "end_pos": end_pos,
+                    "sentence": snt.text,
+                    "conf_md": conf,
+                    "tag": tag,
+                }
 
-                    res = {
-                        "mention": m,
-                        "context": (left_ctxt, right_ctxt),
-                        "candidates": cands,
-                        "gold": ["NONE"],
-                        "pos": start_pos,
-                        "sent_idx": idx_sent,
-                        "ngram": ngram,
-                        "end_pos": end_pos,
-                        "sentence": sentence,
-                        "conf_md": conf,
-                        "tag": tag,
-                    }
+                result_doc.append(res)
 
-                    result_doc.append(res)
-
-            results[doc] = result_doc
+            results[docid] = result_doc
 
         return results, total_ment

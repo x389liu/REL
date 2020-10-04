@@ -20,20 +20,10 @@ class MentionDetectionBase:
 
         # Iteratively add words up until we have 100
         left_ctxt = split_in_words(sentence[:start])
-        if idx_sent > 0:
-            i = idx_sent - 1
-            while (i >= 0) and (len(left_ctxt) <= 100):
-                left_ctxt = split_in_words(sentences_doc[i]) + left_ctxt
-                i -= 1
         left_ctxt = left_ctxt[-100:]
         left_ctxt = " ".join(left_ctxt)
 
         right_ctxt = split_in_words(sentence[end:])
-        if idx_sent < len(sentences_doc):
-            i = idx_sent + 1
-            while (i < len(sentences_doc)) and (len(right_ctxt) <= 100):
-                right_ctxt = right_ctxt + split_in_words(sentences_doc[i])
-                i += 1
         right_ctxt = right_ctxt[:100]
         right_ctxt = " ".join(right_ctxt)
 
