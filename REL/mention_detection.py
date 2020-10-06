@@ -1,8 +1,8 @@
-from flair.data import Sentence
-from flair.models import SequenceTagger
+#from flair.data import Sentence
+#from flair.models import SequenceTagger
 from segtok.segmenter import split_single
 
-from REL.mention_detection_base import MentionDetectionBase
+from REL.REL.mention_detection_base import MentionDetectionBase
 
 """
 Class responsible for mention detection.
@@ -95,9 +95,7 @@ class MentionDetection(MentionDetectionBase):
                 ]
                 res[doc][i] = [sent, spans_sent]
                 if len(spans) == 0:
-                    processed_sentences.append(
-                        Sentence(sent, use_tokenizer=True) if is_flair else sent
-                    )
+                    processed_sentences.append(sent)
                 i += 1
             splits.append(splits[-1] + i)
         return res, processed_sentences, splits
@@ -116,7 +114,7 @@ class MentionDetection(MentionDetectionBase):
             )
 
         # Verify if Flair, else ngram or custom.
-        is_flair = isinstance(tagger, SequenceTagger)
+        is_flair = False
         results = {}
         total_ment = 0
 

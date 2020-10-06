@@ -1,8 +1,8 @@
 import os
 import re
 
-from REL.db.generic import GenericLookup
-from REL.utils import modify_uppercase_phrase, split_in_words
+from REL.REL.db.generic import GenericLookup
+from REL.REL.utils import modify_uppercase_phrase, split_in_words
 
 
 class MentionDetectionBase:

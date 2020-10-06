@@ -96,17 +96,15 @@ def process_results(
             else:
                 offset = 0
             start_pos = offset + ment["pos"]
-            mention_length = int(ment["end_pos"] - ment["pos"])
+            end_pos = offset + ment["end_pos"]
 
             # self.verify_pos(ment["ngram"], start_pos, end_pos, text)
             if pred["prediction"] != "NIL":
                 temp = (
                     start_pos,
-                    mention_length,
+                    end_pos,
                     ment["ngram"],
                     pred["prediction"],
-                    pred["conf_ed"],
-                    ment["conf_md"] if "conf_md" in ment else 0.0,
                     ment["tag"] if "tag" in ment else "NULL",
                 )
                 res_doc.append(temp)

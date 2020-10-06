@@ -1,9 +1,8 @@
-from REL.mention_detection import MentionDetection
-from REL.utils import process_results
-from REL.entity_disambiguation import EntityDisambiguation
-from REL.ner import NERBase, Span
-import spacy
-
+from REL.REL.mention_detection import MentionDetection
+from REL.REL.utils import process_results
+from REL.REL.entity_disambiguation import EntityDisambiguation
+from REL.REL.ner import NERBase, Span
+#import spacy
 
 class MD_Module(NERBase):
     def __init__(self):
@@ -14,7 +13,6 @@ class MD_Module(NERBase):
         for ent in sentence_nlp.ents:
             if ent.label_ in ['ORG', 'PERSON', 'GPE']:
                 mentions.append(Span(ent.text, ent.start_char, ent.end_char, 0, ent.label_))
-        print(mentions)
         return mentions
 
 
@@ -33,6 +31,10 @@ def entity_linking(input_sentence_nlp):
     model = EntityDisambiguation(base_url, wiki_version, config)
     predictions, timing = model.predict(mentions_dataset)
 
-    result = process_results(mentions_dataset, predictions, input_text)
+    result = process_results(mentions_dataset, predictions, input_sentence_nlp)
     return result
 
+#nlp = spacy.load('en_core_web_lg')
+#text = nlp('File: Sean Eldridge, president of Hudson River Ventures, left, and Chris Hughes, editor-in-chief and publisher of The New Republic and a founder of Facebook Inc., stand for a photograph during the Paris Review Spring Revel gala in New York, U.S., on Tuesday, April 3, 2012. ')
+#input_sentence_nlp = {'doc1':text}
+#print(entity_linking(input_sentence_nlp))

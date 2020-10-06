@@ -17,11 +17,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from torch.autograd import Variable
 
-import REL.utils as utils
-from REL.db.generic import GenericLookup
-from REL.mulrel_ranker import MulRelRanker, PreRank
-from REL.training_datasets import TrainingEvaluationDatasets
-from REL.vocabulary import Vocabulary
+import REL.REL.utils as utils
+from REL.REL.db.generic import GenericLookup
+from REL.REL.mulrel_ranker import MulRelRanker, PreRank
+from REL.REL.training_datasets import TrainingEvaluationDatasets
+from REL.REL.vocabulary import Vocabulary
 
 """
 Parent Entity Disambiguation class that directs the various subclasses used
@@ -119,7 +119,7 @@ class EntityDisambiguation:
         config = default_config
 
         model_dict = json.loads(
-            pkg_resources.resource_string("REL.models", "models.json")
+            pkg_resources.resource_string("REL.REL.models", "models.json")
         )
         model_path: str = config["model_path"]
         # load aliased url if it exists, else keep original string
